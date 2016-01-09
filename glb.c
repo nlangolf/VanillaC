@@ -20,7 +20,7 @@ void Draw2(int i)
   glEnd();
 }
 
-void display(void)
+void display_callback()
 {
   int i;
   double angle;
@@ -57,7 +57,7 @@ void InitializeAndCreateWindow()
   glutCreateWindow ("Hellro"); 
 
   // Set display callback
-  glutDisplayFunc(display); 
+  glutDisplayFunc(display_callback);
 }
 
 int main(int argc, char** argv)
