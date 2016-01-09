@@ -1,6 +1,6 @@
-#include <stdlib.h>
 #include <math.h>
-#include <GLUT/glut.h>  /* Header File For The GLut Library*/
+#include <GLUT/glut.h>
+#include <pthread.h>
 
 void SetDrawColor(float red_weight, float green_weight, float blue_weight)
 {
@@ -85,10 +85,15 @@ void InitializeAndCreateWindow()
   glutDisplayFunc(display_callback);
 }
 
-int main(int argc, char** argv)
+void RunGlut(int* argc, char**argv)
 {
-  InitializeGlut(&argc, argv);
+  InitializeGlut(argc, argv);
   InitializeAndCreateWindow();
   glutMainLoop();
+}
+
+int main(int argc, char** argv)
+{
+  RunGlut(&argc, argv);
   return 0;
 }
