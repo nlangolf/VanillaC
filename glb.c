@@ -2,10 +2,18 @@
 #include <math.h>
 #include <GLUT/glut.h>  /* Header File For The GLut Library*/
 
+void SetDrawColor(float red_weight, float green_weight, float blue_weight)
+{
+  glColor3f(red_weight, green_weight, blue_weight);
+}
+
 void Draw1(int i)
 {
-  glColor3f((float)i/360.0,1.0,1.0);
-  glBegin(GL_LINES);
+  float red_weight = (float)i / 360.0; // TODO What is C Operator Precedence?
+  SetDrawColor(red_weight, 1.0, 1.0);
+
+  const int TreatEachPairOfVerticesAsAnIndependentLine = GL_LINES;
+  glBegin(TreatEachPairOfVerticesAsAnIndependentLine);
   glVertex2d(cos(i/57.25779),sin(i/57.25779));
   glVertex2d(cos((i+90)/57.25779),sin((i+90)/57.25779));
   glEnd();
@@ -13,8 +21,11 @@ void Draw1(int i)
 
 void Draw2(int i)
 {
-  glColor3f(1.0,(float)i/360.0,1.0);
-  glBegin(GL_LINES);
+  float green_weight = (float)i / 360.0; // TODO What is C Operator Precedence?
+  SetDrawColor(1.0, green_weight, 1.0);
+
+  const int TreatEachPairOfVerticesAsAnIndependentLine = GL_LINES;
+  glBegin(TreatEachPairOfVerticesAsAnIndependentLine);
   glVertex2d(cos(i/57.25779),sin(i/57.25779));
   glVertex2d(cos((i*2)/57.25779),sin((i+90)/57.25779));
   glEnd();
