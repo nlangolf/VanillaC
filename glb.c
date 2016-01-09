@@ -31,6 +31,16 @@ void Draw2(int i)
   glEnd();
 }
 
+void DrawTriangle()
+{
+  const int TreatEachTripletOfVerticesAsAnIndependentTriangle = GL_TRIANGLES;
+  glBegin(TreatEachTripletOfVerticesAsAnIndependentTriangle);
+  glVertex2d(0.5, 1.0);
+  glVertex2d(0.3, 0.5);
+  glVertex2d(1.0, 0.5);
+  glEnd();
+}
+
 void display_callback()
 {
   int current_degree;
@@ -45,6 +55,7 @@ void display_callback()
     Draw2(current_degree);
   }
 
+  DrawTriangle();
   glLoadIdentity();
   glutSwapBuffers();
 }
