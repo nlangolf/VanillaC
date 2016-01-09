@@ -22,13 +22,16 @@ void Draw2(int i)
 
 void display_callback()
 {
-  int i;
+  int current_degree;
   double angle;
   glClear(GL_COLOR_BUFFER_BIT);
-  for (i=0; i<360; i+=4)
+  const int InitialDegree = 0;
+  const int LastDegree = 359;
+  const int DegreeIncrement = 4;
+  for (current_degree = InitialDegree; current_degree <= LastDegree; current_degree += DegreeIncrement)
   {
-    Draw1(i);
-    Draw2(i);
+    Draw1(current_degree);
+    Draw2(current_degree);
   }
 
   glLoadIdentity();
