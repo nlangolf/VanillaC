@@ -9,8 +9,14 @@
 
 void LoggerInactiveCallback()
 {
-  printf("LOG STATS: %d log lines lost; %d inactive cycles\n", GetLoggerLinesLost(), GetLoggerInactiveCycles());
-  sleep(1);
+  const int Millisecond = 1000;
+  int logger_lines_lost = GetLoggerLinesLost();
+  if(logger_lines_lost > 0)
+  {
+    printf("LOG STATS: %d log lines lost; %d inactive cycles\n", GetLoggerLinesLost(), GetLoggerInactiveCycles());
+  }
+
+  usleep(50 * Millisecond);
 }
 
 void RunLogger()
