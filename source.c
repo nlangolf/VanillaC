@@ -23,8 +23,6 @@ void Render()
    glVertex3f( 0.0f,  2.0f, 0.0f);
   glEnd();
 
-  angle += 0.1f;
-
   // We are done rendering into the back buffer, so let's bring it out front
   glutSwapBuffers();
 }
@@ -66,6 +64,7 @@ void DisplayCallback()
 
 void IdleCallback()
 {
+  angle += 0.1f;
   Render();
 }
 
