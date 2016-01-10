@@ -2,93 +2,21 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
-#include <stdarg.h>
 #include <stdio.h>
+#include "logger.h"
 
 //
-// START LOGGING CODE
+// Start Internal Logging Project
 //
-const int LogLineMaxLength = 50;
-const int MaxPendingLogLines = 100;
-int logger_lines_lost = 0;
-int logger_inactive_cycles = 0;
-struct LogLine
+void LoggerInactiveCallback()
 {
-  char string[LogLineMaxLength];
-};
-struct LogLine logLines[MaxPendingLogLines];
-int currentWriteLogLineIndex = 0;
-int currentReadLogLineIndex = 0;
-
-char* GetLine(int index)
-{
-  return logLines[index].string;
-}
-
-int ReadLinesExist()
-{
-  if (currentReadLogLineIndex == currentWriteLogLineIndex)
-  {
-    return 0;
-  }
-
-  return 1;
-}
-
-char* GetNextWriteLine()
-{
-  int nextWriteLogLineIndex = currentWriteLogLineIndex + 1;
-  if(nextWriteLogLineIndex >= MaxPendingLogLines)
-  {
-    nextWriteLogLineIndex = 0;
-  }
-
-  if(nextWriteLogLineIndex == currentReadLogLineIndex)
-  {
-    logger_lines_lost++;
-  }
-
-  char* writeLine = GetLine(currentWriteLogLineIndex);
-  currentWriteLogLineIndex = nextWriteLogLineIndex;
-  return writeLine;
-}
-
-char* GetNextReadLine()
-{
-  char* readLine = GetLine(currentReadLogLineIndex);
-  currentReadLogLineIndex++;
-  if(currentReadLogLineIndex >= MaxPendingLogLines)
-  {
-    currentReadLogLineIndex = 0;
-  }
-
-  return readLine;
-}
-
-void LogFormat(const char *format, ...)
-{
-  va_list args;
-  char* logLine = GetNextWriteLine();
-  va_start(args, format);
-  vsnprintf(logLine, LogLineMaxLength, format, args);
-  va_end(args);
+  printf("LOG STATS: %d log lines lost; %d inactive cycles\n", GetLoggerLinesLost(), GetLoggerInactiveCycles());
+  sleep(1);
 }
 
 void RunLogger()
 {
-  while(1)
-  {
-    if(ReadLinesExist() == 0)
-    {
-      logger_inactive_cycles++;
-      printf("LOG STATS: %d log lines lost; %d inactive cycles", logger_lines_lost, logger_inactive_cycles);
-      sleep(1);
-    }
-
-    char* logLine = GetNextReadLine();
-    printf("%s\n", logLine);
-  }
-
+  LoggerProcedure();
   pthread_exit(NULL);
 }
 
@@ -100,11 +28,8 @@ void BuildAndStartLogger()
   int threadStatus = pthread_create(&log_thread, LogThreadAttributes, log_routine_pointer, NULL);
 }
 //
-// END LOGGING CODE
+// End Internal Logging Project
 //
-
-
-
 
 float angle = 1.0f;
 
