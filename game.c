@@ -31,13 +31,21 @@ float deltaMove = 0.0f;
 // TODO: Implement
 
 #include <unistd.h>
+#include <arpa/inet.h>
+#include "network.h"
 
 void NetworkProcedure()
 {
+  int sock = BuildSocket();
+  struct sockaddr_in addr = BuildAddress();
+  Receive(addr, sock);
+/*
   while(1)
   {
+
     sleep(1);
   }
+*/
 }
 
 void RunNetwork()
