@@ -64,7 +64,7 @@ void DisplayCallback()
 void InitializeGlut()
 {
   const int UseDoubleBufferedWindowFlag = GLUT_DOUBLE;
-  const int UseDepthBufferFlag = GLUT_DEPTH; 
+  const int UseDepthBufferFlag = GLUT_DEPTH;
 
   // Initialize library and negotiate session with window system, with no arguments
   int zero = 0;
@@ -72,7 +72,7 @@ void InitializeGlut()
   glutInit(zero_pointer, NULL);
 
   // Set the inital display mode
-  glutInitDisplayMode (UseDoubleBufferedWindowFlag | UseDepthBufferFlag); 
+  glutInitDisplayMode (UseDoubleBufferedWindowFlag | UseDepthBufferFlag);
 }
 
 void InitializeAndCreateWindow()
@@ -82,7 +82,7 @@ void InitializeAndCreateWindow()
   glutInitWindowPosition (100, 100);
 
   // Create a new top-level window
-  glutCreateWindow ("Hellro"); 
+  glutCreateWindow ("Hellro");
 
   // Set display callback
   glutDisplayFunc(DisplayCallback);
