@@ -30,7 +30,7 @@ void Send(struct sockaddr_in addr, int sock)
       exit(1);
     }
 
-    sleep(5);
+    sleep(1); //TODO OBV pull this out of library
   }
 }
 
@@ -66,7 +66,8 @@ void Receive(struct sockaddr_in addr, int sock)
       break;
     }
 
-    printf("%s: message = \"%s\"\n", inet_ntoa(addr.sin_addr), message);
+    char* network_address = inet_ntoa(addr.sin_addr);
+    ReceiveCallback(network_address, message);
   }
 }
 

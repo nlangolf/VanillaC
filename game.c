@@ -34,18 +34,13 @@ float deltaMove = 0.0f;
 #include <arpa/inet.h>
 #include "network.h"
 
+// TODO: Rename 'Receive'
+// TODO: Send/Receive snapshot each time
 void NetworkProcedure()
 {
   int sock = BuildSocket();
   struct sockaddr_in addr = BuildAddress();
   Receive(addr, sock);
-/*
-  while(1)
-  {
-
-    sleep(1);
-  }
-*/
 }
 
 void RunNetwork()
@@ -78,7 +73,7 @@ void DrawGround()
 
 void DrawSnowman()
 {
- // Draw Body
+  // Draw Body
   glTranslatef(0.0f ,0.75f, 0.0f);
   glutSolidSphere(0.75f,20,20);
 
@@ -137,10 +132,15 @@ void ApplyOtherMovement()
   enemySnowmanY += 0.001f;
 }
 
+void ReceiveCallback(char* network_address, void* message)
+{
+  LogFormat("%s, %s", network_address, message);
+  ApplyOtherMovement();
+}
+
 void Render()
 {
   ApplyHeldKeys();
-  ApplyOtherMovement();
 
   // Clear color and depth buffers
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
