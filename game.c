@@ -1,4 +1,5 @@
 // TODO: Pull out networking code
+// TODO: Fix draw order
 
 #include <GLUT/glut.h>
 #include <stdlib.h>
@@ -14,6 +15,9 @@ float lx = 0.0f, lz = -1.0f;
 
 // position of camera
 float x = 0.0f, z = 5.0f;
+
+float enemySnowmanX = 0.0f;
+float enemySnowmanY = 0.0f;
 
 // key states (zero when nothing is pressed)
 float deltaAngle = 0.0f;
@@ -64,11 +68,9 @@ void DrawGround()
   glEnd();
 }
 
-void DrawSnowMan()
+void DrawSnowman()
 {
-  glColor3f(red, green, blue);
-
-  // Draw Body
+ // Draw Body
   glTranslatef(0.0f ,0.75f, 0.0f);
   glutSolidSphere(0.75f,20,20);
 
@@ -88,6 +90,12 @@ void DrawSnowMan()
   // Draw Nose
   glColor3f(1.0f, 0.5f , 0.5f);
   glutSolidCone(0.08f,0.5f,10,2);
+}
+
+void DrawEnemySnowman()
+{
+  glColor3f(1.0f, 0, 0);
+  DrawSnowman();
 }
 
 void computePos()
@@ -115,9 +123,16 @@ void ApplyHeldKeys()
   }
 }
 
+void ApplyOtherMovement()
+{
+  enemySnowmanX += 0.001f;
+  enemySnowmanY += 0.001f;
+}
+
 void Render()
 {
   ApplyHeldKeys();
+  ApplyOtherMovement();
 
   // Clear color and depth buffers
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -131,13 +146,19 @@ void Render()
 		0.0f, 1.0f, 0.0f);
   DrawGround();
 
+  glPushMatrix();
+  glTranslatef(enemySnowmanX * 10.0, 0.0, enemySnowmanY * 10.0);
+  DrawEnemySnowman();
+  glPopMatrix();
+
   for (int i = -3; i < 3; i++)
   {
     for (int j = -3; j < 3; j++)
     {
       glPushMatrix();
       glTranslatef(i*10.0, 0.0, j*10.0);
-      DrawSnowMan();
+      glColor3f(1, 1, 1);
+      DrawSnowman();
       glPopMatrix();
     }
   }
