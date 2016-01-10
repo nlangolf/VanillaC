@@ -1,6 +1,7 @@
 #include <math.h>
 #include <GLUT/glut.h>
 #include <pthread.h>
+#include <stdio.h>
 
 void SetDrawColor(float red_weight, float green_weight, float blue_weight)
 {
@@ -41,7 +42,7 @@ void DrawTriangle()
   glEnd();
 }
 
-void display_callback()
+void DisplayCallback()
 {
   int current_degree;
   double angle;
@@ -60,13 +61,15 @@ void display_callback()
   glutSwapBuffers();
 }
 
-void InitializeGlut(int* argc, char**argv)
+void InitializeGlut()
 {
   const int UseDoubleBufferedWindowFlag = GLUT_DOUBLE;
   const int UseDepthBufferFlag = GLUT_DEPTH; 
 
-  // Initialize library and negotiate session with window system
-  glutInit(argc, argv);
+  // Initialize library and negotiate session with window system, with no arguments
+  int zero = 0;
+  int* zero_pointer = &zero;
+  glutInit(zero_pointer, NULL);
 
   // Set the inital display mode
   glutInitDisplayMode (UseDoubleBufferedWindowFlag | UseDepthBufferFlag); 
@@ -82,18 +85,45 @@ void InitializeAndCreateWindow()
   glutCreateWindow ("Hellro"); 
 
   // Set display callback
-  glutDisplayFunc(display_callback);
+  glutDisplayFunc(DisplayCallback);
 }
 
-void RunGlut(int* argc, char**argv)
+void RunGlut()
 {
-  InitializeGlut(argc, argv);
+  InitializeGlut();
   InitializeAndCreateWindow();
   glutMainLoop();
 }
 
+void *ThreadRunCallback(void* thread_id_pointer)
+{
+   const int GlutThreadId = 1;
+   long thread_id = (long)thread_id_pointer;
+   if(thread_id == GlutThreadId)
+   {
+     RunGlut();
+   }
+   else
+   {
+     printf("Hello from thread %ld\n", thread_id);
+   }
+
+   pthread_exit(NULL);
+}
+
 int main(int argc, char** argv)
 {
-  RunGlut(&argc, argv);
+  const int NumberOfThreads = 2;
+  pthread_t threads[NumberOfThreads];
+  for (long current_thread_id = 1; current_thread_id <= NumberOfThreads; current_thread_id++)
+  {
+    pthread_t current_thread = threads[current_thread_id];
+    pthread_t* current_thread_pointer = &current_thread;
+    void* current_thread_id_pointer = (void*)current_thread_id;
+    pthread_create(current_thread_pointer, NULL, ThreadRunCallback, current_thread_id_pointer);
+  }
+
+  printf("Hello from the main thread!\n");
+  pthread_exit(NULL);
   return 0;
 }
