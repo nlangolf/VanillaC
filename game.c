@@ -106,7 +106,7 @@ void IdleCallback()
 {
   angle += 0.1f;
   Render();
-  LogFormat("Angle is %f", angle);
+  //LogFormat("Angle is %f", angle);
 }
 
 void KeyboardCallback(unsigned char keyCode, int x, int y)
