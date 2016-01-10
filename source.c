@@ -5,7 +5,7 @@
 #include <unistd.h>
 
 const int LogLineMaxLength = 50;
-const int MaxPendingLogLines = 500;
+const int MaxPendingLogLines = 10;
 float angle = 0.0f;
 
 struct LogLine
@@ -82,7 +82,7 @@ void IdleCallback()
   Render();
   snprintf(logLines[currentWriteLogLineIndex].string, LogLineMaxLength, "Angle is %f", angle);
   currentWriteLogLineIndex++;
-  if(currentWriteLogLineIndex >= MaxPendingLogLines - 1)
+  if(currentWriteLogLineIndex >= MaxPendingLogLines)
   {
     currentWriteLogLineIndex = 0;
     printf("re: %d\n", currentWriteLogLineIndex);
@@ -125,6 +125,11 @@ void RunLogger()
     char* logLine = logLines[currentReadLogLineIndex].string;
     printf("%s\n", logLine);
     currentReadLogLineIndex++;
+    if(currentReadLogLineIndex >= MaxPendingLogLines)
+    {
+      currentReadLogLineIndex = 0;
+    }
+
     sleep(1);
   }
   pthread_exit(NULL);
