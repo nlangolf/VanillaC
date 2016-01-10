@@ -84,6 +84,7 @@ void LoggerProcedure()
     {
       logger_inactive_cycles++;
       LoggerInactiveCallback();
+      continue;
     }
 
     char* logLine = GetNextReadLine();
