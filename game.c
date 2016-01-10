@@ -14,7 +14,8 @@ float red = 1.0f, blue = 1.0f, green = 1.0f;
 float lx = 0.0f, lz = -1.0f;
 
 // position of camera
-float x = 0.0f, z = 5.0f;
+float myX = 0.0f;
+float myZ = 5.0f;
 
 float enemySnowmanX = 0.0f;
 float enemySnowmanY = 0.0f;
@@ -34,28 +35,51 @@ float deltaMove = 0.0f;
 #include <arpa/inet.h>
 #include "network.h"
 
-// TODO: Rename 'Receive'
 // TODO: Send/Receive snapshot each time
-void NetworkProcedure()
+void ReceiverProcedure()
 {
   int sock = BuildSocket();
   struct sockaddr_in addr = BuildAddress();
   Receive(addr, sock);
 }
 
-void RunNetwork()
+void RunReceiver()
 {
-  NetworkProcedure();
+  ReceiverProcedure();
   pthread_exit(NULL);
 }
 
-void BuildAndStartNetwork()
+void BuildAndStartReceiver()
 {
-  pthread_t network_thread;
-  const pthread_attr_t* NetworkThreadAttributes = NULL;
-  void* network_routine_pointer = RunNetwork;
-  int threadStatus = pthread_create(&network_thread, NetworkThreadAttributes, network_routine_pointer, NULL);
+  pthread_t receiver_thread;
+  const pthread_attr_t* ReceiverThreadAttributes = NULL;
+  void* receiver_routine_pointer = RunReceiver;
+  int threadStatus = pthread_create(&receiver_thread, ReceiverThreadAttributes, receiver_routine_pointer, NULL);
 }
+
+
+void SenderProcedure()
+{
+  int sock = BuildSocket();
+  struct sockaddr_in addr = BuildAddress();
+  // TODO Send if there is something in the queue
+}
+
+void RunSender()
+{
+  SenderProcedure();
+  pthread_exit(NULL);
+}
+
+void BuildAndStartSender()
+{
+  pthread_t sender_thread;
+  const pthread_attr_t* SenderThreadAttributes = NULL;
+  void* sender_routine_pointer = RunSender;
+  int threadStatus = pthread_create(&sender_thread, SenderThreadAttributes, sender_routine_pointer, NULL);
+}
+
+
 //
 // End Network
 //
@@ -103,8 +127,8 @@ void DrawEnemySnowman()
 
 void computePos()
 {
-  x += deltaMove * lx * 0.1f;
-  z += deltaMove * lz * 0.1f;
+  myX += deltaMove * lx * 0.1f;
+  myZ += deltaMove * lz * 0.1f;
 }
 
 void computeDir()
@@ -149,9 +173,9 @@ void Render()
   glLoadIdentity();
 
   // Set camera
-  gluLookAt(	x,    1.0f, z,
-		x+lx, 1.0f, z+lz,
-		0.0f, 1.0f, 0.0f);
+  gluLookAt(	myX,    1.0f, myZ,
+		myX+lx, 1.0f, myZ+lz,
+		0.0f,   1.0f, 0.0f);
   DrawGround();
 
   glPushMatrix();
@@ -257,7 +281,7 @@ void SpecialKeyDownCallback(int key, int xx, int yy)
       break;
   }
 
-  LogFormat("down x:%f z:%f lx:%f lz:%f", x, z, lx, lz);
+  LogFormat("down myX:%f myZ:%f lx:%f lz:%f", myX, myZ, lx, lz);
 }
 
 void SpecialKeyUpCallback(int key, int xx, int yy)
@@ -303,7 +327,8 @@ void RunGlut()
 int main(int argc, char **argv)
 {
   BuildAndStartLogger();
-  BuildAndStartNetwork();
+  BuildAndStartReceiver();
+  BuildAndStartSender();
   RunGlut();
   pthread_exit(NULL);
   return 1;
