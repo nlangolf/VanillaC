@@ -1,14 +1,17 @@
 #include <GLUT/glut.h>
 #include <stdlib.h>
 #include <pthread.h>
-#include <stdio.h>
 #include <unistd.h>
+#include <stdarg.h>
+#include <stdio.h>
 
+//
+// START LOGGING CODE
+//
 const int LogLineMaxLength = 50;
 const int MaxPendingLogLines = 100;
-float angle = 0.0f;
-int log_lines_lost = 0;
-
+int logger_lines_lost = 0;
+int logger_inactive_cycles = 0;
 struct LogLine
 {
   char string[LogLineMaxLength];
@@ -42,14 +45,9 @@ char* GetNextWriteLine()
 
   if(nextWriteLogLineIndex == currentReadLogLineIndex)
   {
-    //printf("stepping on reader!");
-    //fflush(stdout);
-    //return SteppingOnReader;
-    log_lines_lost++;
+    logger_lines_lost++;
   }
 
-  //printf("w %d, %d\n", currentWriteLogLineIndex, nextWriteLogLineIndex);
-  //fflush(stdout);
   char* writeLine = GetLine(currentWriteLogLineIndex);
   currentWriteLogLineIndex = nextWriteLogLineIndex;
   return writeLine;
@@ -57,8 +55,6 @@ char* GetNextWriteLine()
 
 char* GetNextReadLine()
 {
-  //printf("r %d\n", currentReadLogLineIndex);
-  //fflush(stdout);
   char* readLine = GetLine(currentReadLogLineIndex);
   currentReadLogLineIndex++;
   if(currentReadLogLineIndex >= MaxPendingLogLines)
@@ -68,6 +64,49 @@ char* GetNextReadLine()
 
   return readLine;
 }
+
+void LogFormat(const char *format, ...)
+{
+  va_list args;
+  char* logLine = GetNextWriteLine();
+  va_start(args, format);
+  vsnprintf(logLine, LogLineMaxLength, format, args);
+  va_end(args);
+}
+
+void RunLogger()
+{
+  while(1)
+  {
+    if(ReadLinesExist() == 0)
+    {
+      logger_inactive_cycles++;
+      printf("LOG STATS: %d log lines lost; %d inactive cycles", logger_lines_lost, logger_inactive_cycles);
+      sleep(1);
+    }
+
+    char* logLine = GetNextReadLine();
+    printf("%s\n", logLine);
+  }
+
+  pthread_exit(NULL);
+}
+
+void BuildAndStartLogger()
+{
+  pthread_t log_thread;
+  const pthread_attr_t* LogThreadAttributes = NULL;
+  void* log_routine_pointer = RunLogger;
+  int threadStatus = pthread_create(&log_thread, LogThreadAttributes, log_routine_pointer, NULL);
+}
+//
+// END LOGGING CODE
+//
+
+
+
+
+float angle = 1.0f;
 
 void Render()
 {
@@ -133,8 +172,7 @@ void IdleCallback()
 {
   angle += 0.1f;
   Render();
-  char* logLine = GetNextWriteLine();
-  snprintf(logLine, LogLineMaxLength, "Angle is %f", angle);
+  LogFormat("Angle is %f", angle);
 }
 
 void KeyboardCallback(unsigned char keyCode, int x, int y)
@@ -164,32 +202,6 @@ void RunGlut()
 
   // enter GLUT event processing loop
   glutMainLoop();
-}
-
-void RunLogger()
-{
-  while(1)
-  {
-    if(ReadLinesExist() == 0)
-    {
-      //printf("nothing to read\n");
-      //fflush(stdout);
-      sleep(1);
-    }
-
-    char* logLine = GetNextReadLine();
-    printf("%s (%d log lines lost)\n", logLine, log_lines_lost);
-  }
-
-  pthread_exit(NULL);
-}
-
-void BuildAndStartLogger()
-{
-  pthread_t log_thread;
-  const pthread_attr_t* LogThreadAttributes = NULL;
-  void* log_routine_pointer = RunLogger;
-  int threadStatus = pthread_create(&log_thread, LogThreadAttributes, log_routine_pointer, NULL);
 }
 
 int main(int argc, char **argv)
