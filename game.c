@@ -62,6 +62,11 @@ void SenderProcedure()
 {
   int sock = BuildSocket();
   struct sockaddr_in addr = BuildAddress();
+  while(1)
+  {
+    Send(addr, sock);
+    sleep(1);
+  }
   // TODO Send if there is something in the queue
 }
 
