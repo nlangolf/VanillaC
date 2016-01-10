@@ -1,4 +1,5 @@
 #include <GLUT/glut.h>
+#include <stdlib.h>
 
 float angle = 0.0f;
 
@@ -68,6 +69,15 @@ void IdleCallback()
   Render();
 }
 
+void KeyboardCallback(unsigned char keyCode, int x, int y)
+{
+  const int EscapeKeyCode = 27;
+  if (keyCode == EscapeKeyCode)
+  {
+    exit(0);
+  }
+}
+
 int main(int argc, char **argv)
 {
   // init GLUT and create window
@@ -81,6 +91,7 @@ int main(int argc, char **argv)
   glutDisplayFunc(DisplayCallback);
   glutReshapeFunc(ReshapeCallback);
   glutIdleFunc(IdleCallback);
+  glutKeyboardFunc(KeyboardCallback);
 
   // enter GLUT event processing loop
   glutMainLoop();
