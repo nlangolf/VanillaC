@@ -1,13 +1,31 @@
 #include <GLUT/glut.h>
 
+float angle = 0.0f;
+
 void Render()
 {
+  // Clear color and depth buffers
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  // Reset transformations
+  glLoadIdentity();
+
+  // Set camera
+  gluLookAt(	0.0f, 0.0f, 10.0f,
+		0.0f, 0.0f,  0.0f,
+		0.0f, 1.0f,  0.0f);
+
+  glRotatef(angle, 0.0f, 1.0f, 0.0f);
+
   glBegin(GL_TRIANGLES);
-   glVertex3f(-2,-2,-5.0);
-   glVertex3f(2,0.0,-5.0);
-   glVertex3f(0.0,2,-5.0);
+   glVertex3f(-2.0f, -2.0f, 0.0f);
+   glVertex3f( 2.0f,  0.0f, 0.0f);
+   glVertex3f( 0.0f,  2.0f, 0.0f);
   glEnd();
+
+  angle += 0.1f;
+
+  // We are done rendering into the back buffer, so let's bring it out front
   glutSwapBuffers();
 }
 
@@ -46,18 +64,24 @@ void DisplayCallback()
   Render();
 }
 
+void IdleCallback()
+{
+  Render();
+}
+
 int main(int argc, char **argv)
 {
   // init GLUT and create window
   glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
+  glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE);
   glutInitWindowPosition(100, 100);
   glutInitWindowSize(320, 320);
-  glutCreateWindow("Lighthouse3D - GLUT Tutorial");
+  glutCreateWindow("Allo");
 
   // register callbacks
   glutDisplayFunc(DisplayCallback);
   glutReshapeFunc(ReshapeCallback);
+  glutIdleFunc(IdleCallback);
 
   // enter GLUT event processing loop
   glutMainLoop();
