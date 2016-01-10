@@ -1,3 +1,5 @@
+// TODO: Pull out networking code
+
 #include <GLUT/glut.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -18,7 +20,7 @@ void NetworkProcedure()
 {
   while(1)
   {
-    LogFormat("nettt");
+    //LogFormat("nettt");
     sleep(1);
   }
 }
