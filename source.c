@@ -4,7 +4,16 @@
 #include <stdio.h>
 #include <unistd.h>
 
+const int LogLineMaxLength = 50;
 float angle = 0.0f;
+
+struct LogNode
+{
+  char string[LogLineMaxLength];
+};
+struct LogNode logNodes[50]; // The logger can have up to 50 lines in the queue
+int currentWriteLogNodeIndex = 0;
+int currentReadLogNodeIndex = 0;
 
 void Render()
 {
@@ -70,6 +79,7 @@ void IdleCallback()
 {
   angle += 0.1f;
   Render();
+  snprintf(logNodes[currentWriteLogNodeIndex].string, LogLineMaxLength, "Angle is %f", angle);
 }
 
 void KeyboardCallback(unsigned char keyCode, int x, int y)
@@ -105,7 +115,8 @@ void RunLogger()
 {
   while(1)
   {
-    printf("hello\n");
+    char* logLine = logNodes[currentReadLogNodeIndex].string;
+    printf("%s\n", logLine);
     sleep(1);
   }
   pthread_exit(NULL);
