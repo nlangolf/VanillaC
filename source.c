@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <stdio.h>
+#include <unistd.h>
 
 float angle = 0.0f;
 
@@ -102,7 +103,11 @@ void RunGlut()
 
 void RunLogger()
 {
-  printf("hello\n");
+  while(1)
+  {
+    printf("hello\n");
+    sleep(1);
+  }
   pthread_exit(NULL);
 }
 
