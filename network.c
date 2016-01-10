@@ -36,9 +36,22 @@ void Send(struct sockaddr_in addr, int sock)
 
 void Receive(struct sockaddr_in addr, int sock)
 {
-  char message[50];
-  unsigned int addrlen = sizeof(addr);
-  if (bind(sock, (struct sockaddr *) &addr, sizeof(addr)) < 0)
+  int s = socket(AF_INET, SOCK_DGRAM, 0);
+  int reuse = 1;
+  if (setsockopt(s, SOL_SOCKET, SO_REUSEPORT, &reuse, sizeof(reuse)) == -1)
+  {
+    perror("sol socket");
+    exit(1);
+  }
+
+  /* construct a multicast address structure */
+  struct sockaddr_in mc_addr;
+  memset(&mc_addr, 0, sizeof(mc_addr));
+  mc_addr.sin_family = AF_INET;
+  mc_addr.sin_addr.s_addr = inet_addr(EXAMPLE_GROUP);
+  mc_addr.sin_port = htons(EXAMPLE_PORT);
+
+  if (bind(s, (struct sockaddr*) &mc_addr, sizeof(mc_addr)) == -1)
   {
     perror("bind");
     exit(1);
@@ -46,28 +59,21 @@ void Receive(struct sockaddr_in addr, int sock)
 
   struct ip_mreq mreq;
   mreq.imr_multiaddr.s_addr = inet_addr(EXAMPLE_GROUP);
-  mreq.imr_interface.s_addr = htonl(INADDR_ANY);
-  if (setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) < 0)
-  {
-    perror("setsockopt mreq");
-    exit(1);
-  }
+  mreq.imr_interface.s_addr = INADDR_ANY;
+  setsockopt(s, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq));
+
+  char message[50];
 
   while (1)
   {
-    int cnt = recvfrom(sock, message, sizeof(message), 0, (struct sockaddr *) &addr, &addrlen);
-    if (cnt < 0)
+    int n = 0;
+    while ((n = read(s, message, 1024)) > 0)
     {
-      perror("recvfrom");
-      exit(1);
-    }
-    else if (cnt == 0)
-    {
-      break;
-    }
+      //printf("group %s fd %d len %d: %.*s\n", EXAMPLE_GROUP, s, n, n, message);
 
-    char* network_address = inet_ntoa(addr.sin_addr);
-    ReceiveCallback(network_address, message);
+      char* network_address = inet_ntoa(addr.sin_addr);
+      ReceiveCallback(network_address, message);
+    }
   }
 }
 

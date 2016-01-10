@@ -4,7 +4,7 @@
 
 void ReceiveCallback(char* network_address, void* message)
 {
-  printf("recieved\n");
+  printf("recieved %s %s\n", network_address, message);
   // todo split up the network lib so sender doesn't need to implement this
 }
 
