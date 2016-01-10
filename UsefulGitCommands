@@ -1,0 +1,4 @@
+git rev-list -n 1 HEAD -- glb.out.dSYM/Contents/Info.plist 
+git cat-file -t 00b79
+git diff --staged
+git commit --amend --no-edit
