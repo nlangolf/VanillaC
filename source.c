@@ -5,8 +5,9 @@
 #include <unistd.h>
 
 const int LogLineMaxLength = 50;
-const int MaxPendingLogLines = 10;
+const int MaxPendingLogLines = 100;
 float angle = 0.0f;
+int log_lines_lost = 0;
 
 struct LogLine
 {
@@ -15,6 +16,58 @@ struct LogLine
 struct LogLine logLines[MaxPendingLogLines];
 int currentWriteLogLineIndex = 0;
 int currentReadLogLineIndex = 0;
+
+char* GetLine(int index)
+{
+  return logLines[index].string;
+}
+
+int ReadLinesExist()
+{
+  if (currentReadLogLineIndex == currentWriteLogLineIndex)
+  {
+    return 0;
+  }
+
+  return 1;
+}
+
+char* GetNextWriteLine()
+{
+  int nextWriteLogLineIndex = currentWriteLogLineIndex + 1;
+  if(nextWriteLogLineIndex >= MaxPendingLogLines)
+  {
+    nextWriteLogLineIndex = 0;
+  }
+
+  if(nextWriteLogLineIndex == currentReadLogLineIndex)
+  {
+    //printf("stepping on reader!");
+    //fflush(stdout);
+    //return SteppingOnReader;
+    log_lines_lost++;
+  }
+
+  //printf("w %d, %d\n", currentWriteLogLineIndex, nextWriteLogLineIndex);
+  //fflush(stdout);
+  char* writeLine = GetLine(currentWriteLogLineIndex);
+  currentWriteLogLineIndex = nextWriteLogLineIndex;
+  return writeLine;
+}
+
+char* GetNextReadLine()
+{
+  //printf("r %d\n", currentReadLogLineIndex);
+  //fflush(stdout);
+  char* readLine = GetLine(currentReadLogLineIndex);
+  currentReadLogLineIndex++;
+  if(currentReadLogLineIndex >= MaxPendingLogLines)
+  {
+    currentReadLogLineIndex = 0;
+  }
+
+  return readLine;
+}
 
 void Render()
 {
@@ -80,13 +133,8 @@ void IdleCallback()
 {
   angle += 0.1f;
   Render();
-  snprintf(logLines[currentWriteLogLineIndex].string, LogLineMaxLength, "Angle is %f", angle);
-  currentWriteLogLineIndex++;
-  if(currentWriteLogLineIndex >= MaxPendingLogLines)
-  {
-    currentWriteLogLineIndex = 0;
-    printf("re: %d\n", currentWriteLogLineIndex);
-  }
+  char* logLine = GetNextWriteLine();
+  snprintf(logLine, LogLineMaxLength, "Angle is %f", angle);
 }
 
 void KeyboardCallback(unsigned char keyCode, int x, int y)
@@ -122,26 +170,26 @@ void RunLogger()
 {
   while(1)
   {
-    char* logLine = logLines[currentReadLogLineIndex].string;
-    printf("%s\n", logLine);
-    currentReadLogLineIndex++;
-    if(currentReadLogLineIndex >= MaxPendingLogLines)
+    if(ReadLinesExist() == 0)
     {
-      currentReadLogLineIndex = 0;
+      //printf("nothing to read\n");
+      //fflush(stdout);
+      sleep(1);
     }
 
-    sleep(1);
+    char* logLine = GetNextReadLine();
+    printf("%s (%d log lines lost)\n", logLine, log_lines_lost);
   }
+
   pthread_exit(NULL);
 }
 
 void BuildAndStartLogger()
 {
   pthread_t log_thread;
-  pthread_t* log_thread_pointer = &log_thread;
-  const pthread_attr_t* LogThreadAttributes;
+  const pthread_attr_t* LogThreadAttributes = NULL;
   void* log_routine_pointer = RunLogger;
-  pthread_create(log_thread_pointer, LogThreadAttributes, log_routine_pointer, NULL);
+  int threadStatus = pthread_create(&log_thread, LogThreadAttributes, log_routine_pointer, NULL);
 }
 
 int main(int argc, char **argv)
