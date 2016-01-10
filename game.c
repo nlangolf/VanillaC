@@ -15,6 +15,10 @@ float lx = 0.0f, lz = -1.0f;
 // position of camera
 float x = 0.0f, z = 5.0f;
 
+// key states (zero when nothing is pressed)
+float deltaAngle = 0.0f;
+float deltaMove = 0.0f;
+
 //
 // Network
 //
@@ -28,7 +32,6 @@ void NetworkProcedure()
 {
   while(1)
   {
-    //LogFormat("nettt");
     sleep(1);
   }
 }
@@ -87,8 +90,35 @@ void DrawSnowMan()
   glutSolidCone(0.08f,0.5f,10,2);
 }
 
+void computePos()
+{
+  x += deltaMove * lx * 0.1f;
+  z += deltaMove * lz * 0.1f;
+}
+
+void computeDir()
+{
+  camera_angle += deltaAngle;
+  lx = sin(camera_angle);
+  lz = -cos(camera_angle);
+}
+
+void ApplyHeldKeys()
+{
+  if(deltaMove)
+  {
+    computePos();
+  }
+  if(deltaAngle)
+  {
+    computeDir();
+  }
+}
+
 void Render()
 {
+  ApplyHeldKeys();
+
   // Clear color and depth buffers
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -154,10 +184,9 @@ void DisplayCallback()
 void IdleCallback()
 {
   Render();
-  //LogFormat("Angle is %f", angle);
 }
 
-void KeyboardCallback(unsigned char keyCode, int x, int y)
+void KeyboardCallback(unsigned char keyCode, int xx, int yy)
 {
   const int EscapeKeyCode = 27;
   if (keyCode == EscapeKeyCode)
@@ -166,51 +195,55 @@ void KeyboardCallback(unsigned char keyCode, int x, int y)
   }
 }
 
-void SpecialKeyboardCallback(int key, int x, int y)
+void SpecialKeyDownCallback(int key, int xx, int yy)
 {
-  const float CameraUpDownSensitivity = 0.5f;
-  const float CameraAngleSensitivity = 0.01f;
   switch(key)
   {
     case GLUT_KEY_F1 :
       red = 1.0;
       green = 0.0;
       blue = 0.0;
-      LogFormat("f1 pressed");
       break;
     case GLUT_KEY_F2 :
       red = 0.0;
       green = 1.0;
       blue = 0.0;
-      LogFormat("f2 pressed");
       break;
     case GLUT_KEY_F3 :
       red = 0.0;
       green = 0.0;
       blue = 1.0;
-      LogFormat("f3 pressed");
       break;
     case GLUT_KEY_LEFT :
-      camera_angle -= CameraAngleSensitivity;
-      lx = sin(camera_angle);
-      lz = -cos(camera_angle);
+      deltaAngle = -0.01f;
       break;
     case GLUT_KEY_RIGHT :
-      camera_angle += CameraAngleSensitivity;
-      lx = sin(camera_angle);
-      lz = -cos(camera_angle);
+      deltaAngle = 0.01f;
       break;
     case GLUT_KEY_UP :
-      x += lx * CameraUpDownSensitivity;
-      z += lz * CameraUpDownSensitivity;
+      deltaMove = 0.5f;
       break;
     case GLUT_KEY_DOWN :
-      x -= lx * CameraUpDownSensitivity;
-      z -= lz * CameraUpDownSensitivity;
+      deltaMove = -0.5f;
       break;
   }
 
-  LogFormat("x:%f z:%f lx:%f lz:%f", x, z, lx, lz);
+  LogFormat("down x:%f z:%f lx:%f lz:%f", x, z, lx, lz);
+}
+
+void SpecialKeyUpCallback(int key, int xx, int yy)
+{
+  switch (key)
+  {
+    case GLUT_KEY_LEFT :
+    case GLUT_KEY_RIGHT :
+      deltaAngle = 0.0f;
+      break;
+    case GLUT_KEY_UP :
+    case GLUT_KEY_DOWN :
+      deltaMove = 0;
+      break;
+  }
 }
 
 void RunGlut()
@@ -228,7 +261,11 @@ void RunGlut()
   glutReshapeFunc(ReshapeCallback);
   glutIdleFunc(IdleCallback);
   glutKeyboardFunc(KeyboardCallback);
-  glutSpecialFunc(SpecialKeyboardCallback);
+
+  // We don't care about key-repeat because we look at up and down
+  glutIgnoreKeyRepeat(1);
+  glutSpecialFunc(SpecialKeyDownCallback);
+  glutSpecialUpFunc(SpecialKeyUpCallback);
 
   // enter GLUT event processing loop
   glutMainLoop();
