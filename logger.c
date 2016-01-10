@@ -1,3 +1,8 @@
+// TODO: We probably need locks, as there can be multiple threads
+// TODO: Cleanly stop this thread
+// TODO: Verify the LogLine data structure is still necessary
+// TODO: Search for memory leaks
+
 #include <stdarg.h>
 #include <stdio.h>
 #include "logger.h"

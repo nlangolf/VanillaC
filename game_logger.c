@@ -1,3 +1,7 @@
+// TODO: Handle error if thread isn't created properly
+// TODO: Sleeping for a whole second when inactive sounds like overkill
+// TODO: See how full the logger queue ever gets--that'd be an interesting stat!
+
 #include <pthread.h>
 #include <unistd.h>
 #include <stdio.h>

@@ -5,6 +5,41 @@
 
 float angle = 1.0f;
 
+//
+// Network
+//
+
+// TODO: Verify thread is created property
+// TODO: Implement
+
+#include <unistd.h>
+
+void NetworkProcedure()
+{
+  while(1)
+  {
+    LogFormat("nettt");
+    sleep(1);
+  }
+}
+
+void RunNetwork()
+{
+  NetworkProcedure();
+  pthread_exit(NULL);
+}
+
+void BuildAndStartNetwork()
+{
+  pthread_t network_thread;
+  const pthread_attr_t* NetworkThreadAttributes = NULL;
+  void* network_routine_pointer = RunNetwork;
+  int threadStatus = pthread_create(&network_thread, NetworkThreadAttributes, network_routine_pointer, NULL);
+}
+//
+// End Network
+//
+
 void Render()
 {
   // Clear color and depth buffers
@@ -104,6 +139,7 @@ void RunGlut()
 int main(int argc, char **argv)
 {
   BuildAndStartLogger();
+  BuildAndStartNetwork();
   RunGlut();
   pthread_exit(NULL);
   return 1;
