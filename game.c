@@ -3,10 +3,17 @@
 #include <GLUT/glut.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <math.h>
 #include "game_logger.h"
 
-float angle = 1.0f;
-float red=1.0f, blue=1.0f, green=1.0f;
+float camera_angle = 0.0f;
+float red = 1.0f, blue = 1.0f, green = 1.0f;
+
+// vector representing camera's direction
+float lx = 0.0f, lz = -1.0f;
+
+// position of camera
+float x = 0.0f, z = 5.0f;
 
 //
 // Network
@@ -52,11 +59,9 @@ void Render()
   glLoadIdentity();
 
   // Set camera
-  gluLookAt(	0.0f, 0.0f, 10.0f,
-		0.0f, 0.0f,  0.0f,
-		0.0f, 1.0f,  0.0f);
-
-  glRotatef(angle, 0.0f, 1.0f, 0.0f);
+  gluLookAt(	x,    1.0f, z,
+		x+lx, 1.0f, z+lz,
+		0.0f, 1.0f, 0.0f);
 
   glColor3f(red, green, blue);
 
@@ -107,7 +112,6 @@ void DisplayCallback()
 
 void IdleCallback()
 {
-  angle += 0.1f;
   Render();
   //LogFormat("Angle is %f", angle);
 }
@@ -123,6 +127,8 @@ void KeyboardCallback(unsigned char keyCode, int x, int y)
 
 void SpecialKeyboardCallback(int key, int x, int y)
 {
+  const float CameraUpDownSensitivity = 0.5f;
+  const float CameraAngleSensitivity = 0.01f;
   switch(key)
   {
     case GLUT_KEY_F1 :
@@ -143,7 +149,27 @@ void SpecialKeyboardCallback(int key, int x, int y)
       blue = 1.0;
       LogFormat("f3 pressed");
       break;
+    case GLUT_KEY_LEFT :
+      camera_angle -= CameraAngleSensitivity;
+      lx = sin(camera_angle);
+      lz = -cos(camera_angle);
+      break;
+    case GLUT_KEY_RIGHT :
+      camera_angle += CameraAngleSensitivity;
+      lx = sin(camera_angle);
+      lz = -cos(camera_angle);
+      break;
+    case GLUT_KEY_UP :
+      x += lx * CameraUpDownSensitivity;
+      z += lz * CameraUpDownSensitivity;
+      break;
+    case GLUT_KEY_DOWN :
+      x -= lx * CameraUpDownSensitivity;
+      z -= lz * CameraUpDownSensitivity;
+      break;
   }
+
+  LogFormat("x:%f z:%f lx:%f lz:%f", x, z, lx, lz);
 }
 
 void RunGlut()
