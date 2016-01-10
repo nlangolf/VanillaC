@@ -118,9 +118,11 @@ int main(int argc, char** argv)
   for (long current_thread_id = 1; current_thread_id <= NumberOfThreads; current_thread_id++)
   {
     pthread_t current_thread = threads[current_thread_id];
+    const pthread_attr_t* ThreadAttributes = NULL;
+    void* start_routine = ThreadRunCallback;
     pthread_t* current_thread_pointer = &current_thread;
     void* current_thread_id_pointer = (void*)current_thread_id;
-    pthread_create(current_thread_pointer, NULL, ThreadRunCallback, current_thread_id_pointer);
+    pthread_create(current_thread_pointer, ThreadAttributes, start_routine, current_thread_id_pointer);
   }
 
   printf("Hello from the main thread!\n");
