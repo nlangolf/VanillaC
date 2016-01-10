@@ -1,5 +1,7 @@
 #include <GLUT/glut.h>
 #include <stdlib.h>
+#include <pthread.h>
+#include <stdio.h>
 
 float angle = 0.0f;
 
@@ -78,10 +80,11 @@ void KeyboardCallback(unsigned char keyCode, int x, int y)
   }
 }
 
-int main(int argc, char **argv)
+void RunGlut()
 {
   // init GLUT and create window
-  glutInit(&argc, argv);
+  int zero = 0;
+  glutInit(&zero, NULL);
   glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE);
   glutInitWindowPosition(100, 100);
   glutInitWindowSize(320, 320);
@@ -95,6 +98,27 @@ int main(int argc, char **argv)
 
   // enter GLUT event processing loop
   glutMainLoop();
+}
 
+void RunLogger()
+{
+  printf("hello\n");
+  pthread_exit(NULL);
+}
+
+void BuildAndStartLogger()
+{
+  pthread_t log_thread;
+  pthread_t* log_thread_pointer = &log_thread;
+  const pthread_attr_t* LogThreadAttributes;
+  void* log_routine_pointer = RunLogger;
+  pthread_create(log_thread_pointer, LogThreadAttributes, log_routine_pointer, NULL);
+}
+
+int main(int argc, char **argv)
+{
+  BuildAndStartLogger();
+  RunGlut();
+  pthread_exit(NULL);
   return 1;
 }
