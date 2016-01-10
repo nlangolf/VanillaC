@@ -35,10 +35,18 @@ void Draw2(int i)
 void DrawTriangle()
 {
   const int TreatEachTripletOfVerticesAsAnIndependentTriangle = GL_TRIANGLES;
+  SetDrawColor(1.0, 0.0, 0.0);
   glBegin(TreatEachTripletOfVerticesAsAnIndependentTriangle);
-  glVertex2d(0.5, 1.0);
-  glVertex2d(0.3, 0.5);
-  glVertex2d(1.0, 0.5);
+  glVertex3d(0.5, 1.0, 0.0);
+  glVertex3d(0.5, 0.7, 1.0);
+  glVertex3d(1.0, 0.5, 0.0);
+  glEnd();
+
+  SetDrawColor(0.0, 1.0, 0.0);
+  glBegin(TreatEachTripletOfVerticesAsAnIndependentTriangle);
+  glVertex3d(0.5, 1.0, 0.0);
+  glVertex3d(1.0, 0.7, 0.0);
+  glVertex3d(0.5, 0.5, 1.0);
   glEnd();
 }
 
@@ -52,8 +60,8 @@ void DisplayCallback()
   const int DegreeIncrement = 4;
   for (current_degree = InitialDegree; current_degree <= LastDegree; current_degree += DegreeIncrement)
   {
-    Draw1(current_degree);
-    Draw2(current_degree);
+    //Draw1(current_degree);
+    //Draw2(current_degree);
   }
 
   DrawTriangle();
