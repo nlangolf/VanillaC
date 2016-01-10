@@ -6,6 +6,7 @@
 #include "game_logger.h"
 
 float angle = 1.0f;
+float red=1.0f, blue=1.0f, green=1.0f;
 
 //
 // Network
@@ -56,6 +57,8 @@ void Render()
 		0.0f, 1.0f,  0.0f);
 
   glRotatef(angle, 0.0f, 1.0f, 0.0f);
+
+  glColor3f(red, green, blue);
 
   glBegin(GL_TRIANGLES);
    glVertex3f(-2.0f, -2.0f, 0.0f);
@@ -118,6 +121,31 @@ void KeyboardCallback(unsigned char keyCode, int x, int y)
   }
 }
 
+void SpecialKeyboardCallback(int key, int x, int y)
+{
+  switch(key)
+  {
+    case GLUT_KEY_F1 :
+      red = 1.0;
+      green = 0.0;
+      blue = 0.0;
+      LogFormat("f1 pressed");
+      break;
+    case GLUT_KEY_F2 :
+      red = 0.0;
+      green = 1.0;
+      blue = 0.0;
+      LogFormat("f2 pressed");
+      break;
+    case GLUT_KEY_F3 :
+      red = 0.0;
+      green = 0.0;
+      blue = 1.0;
+      LogFormat("f3 pressed");
+      break;
+  }
+}
+
 void RunGlut()
 {
   // init GLUT and create window
@@ -133,6 +161,7 @@ void RunGlut()
   glutReshapeFunc(ReshapeCallback);
   glutIdleFunc(IdleCallback);
   glutKeyboardFunc(KeyboardCallback);
+  glutSpecialFunc(SpecialKeyboardCallback);
 
   // enter GLUT event processing loop
   glutMainLoop();
